@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class JwtUtil {
 
     private final String SECRET = "ma_clef_secrete_super_longue_qui_doit_faire_au_moins_256bits";
-    private final long EXPIRATION_TIME = 1000 * 60 * 15; // 15 minutes
+    private final long EXPIRATION_TIME = 1000 * 60 * 20; // 15 minutes
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
