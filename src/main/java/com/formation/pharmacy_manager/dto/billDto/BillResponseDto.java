@@ -1,5 +1,6 @@
 package com.formation.pharmacy_manager.dto.billDto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -12,6 +13,6 @@ public class BillResponseDto {
     long billId;
     long paymentId;
     LocalDate billDate;
-    double totalAmount;
+    BigDecimal totalAmount;
     String paymentMethod;
 }

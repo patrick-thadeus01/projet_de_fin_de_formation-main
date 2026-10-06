@@ -1,6 +1,8 @@
 package com.formation.pharmacy_manager.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +19,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long paymentId;
 
-    private double totalAmount;
-  
+    // BigDecimal au lieu de double (précision monétaire)
+    @Column(precision = 10, scale = 2)
+    private BigDecimal totalAmount;
+
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
@@ -29,7 +33,7 @@ public class Payment {
 
     @OneToOne
     @JoinColumn(name = "id_command")
-    private Command command; 
+    private Command command;
 
     @OneToOne(mappedBy = "payment")
     private Bill bill;

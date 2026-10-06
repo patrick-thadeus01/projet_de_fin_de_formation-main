@@ -1,5 +1,6 @@
 package com.formation.pharmacy_manager.dto.paymentDto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.formation.pharmacy_manager.entities.PaymentMethod;
@@ -12,7 +13,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class PaymentResponseDto {
     private long paymentId;
-    private double totalAmount;
+    private BigDecimal totalAmount;   // ✅ BigDecimal au lieu de double
     private PaymentMethod paymentMethod;
     private PaymentStatus paymentStatus;
     private long commandId;

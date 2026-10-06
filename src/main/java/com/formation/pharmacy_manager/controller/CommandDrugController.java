@@ -3,6 +3,8 @@ package com.formation.pharmacy_manager.controller;
 import com.formation.pharmacy_manager.dto.commandeDrugDto.CommandeDrugRequestDto;
 import com.formation.pharmacy_manager.dto.commandeDrugDto.CommandeDrugResponseDto;
 import com.formation.pharmacy_manager.services.commandDrugService.CommandDrugService;
+
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,7 @@ public class CommandDrugController {
     private CommandDrugService commandDrugService;
 
     @PostMapping("/create")
-    public ResponseEntity<CommandeDrugResponseDto> createCommandDrug(@RequestBody CommandeDrugRequestDto dto){
+    public ResponseEntity<CommandeDrugResponseDto> createCommandDrug(@Valid @RequestBody CommandeDrugRequestDto dto){
         return ResponseEntity.status(HttpStatus.OK).body(commandDrugService.create(dto));
     }
 
@@ -37,7 +39,7 @@ public class CommandDrugController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<CommandeDrugResponseDto> updateCommandDrug(@PathVariable long id ,@RequestBody CommandeDrugRequestDto dto){
-        return new ResponseEntity<>(commandDrugService.update(id,dto),HttpStatus.OK);
+    public ResponseEntity<CommandeDrugResponseDto> updateCommandDrug(@PathVariable long id ,@Valid @RequestBody CommandeDrugRequestDto dto){
+        return new ResponseEntity<>(commandDrugService.update(id, dto), HttpStatus.OK);
     }
 }

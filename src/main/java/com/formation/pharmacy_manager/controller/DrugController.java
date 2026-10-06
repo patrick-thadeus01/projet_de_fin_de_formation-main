@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,7 +17,7 @@ public class DrugController {
     private DrugService drugService;
 
     @PostMapping("/create")
-    public ResponseEntity<DrugResponseDto> createDrug(@RequestBody DrugRequestDto dto){
+    public ResponseEntity<DrugResponseDto> createDrug(@Valid @RequestBody DrugRequestDto dto){
         return ResponseEntity.status(HttpStatus.OK).body(drugService.createDrug(dto));
     }
 
@@ -27,7 +27,7 @@ public class DrugController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DrugResponseDto> getById(@PathVariable long id){
+   public ResponseEntity<DrugResponseDto> getById(@PathVariable long id){
         return ResponseEntity.ok(drugService.getById(id));
     }
 
@@ -37,7 +37,7 @@ public class DrugController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<DrugResponseDto> updateDrug(@PathVariable long id , @RequestBody DrugRequestDto dto){
+    public ResponseEntity<DrugResponseDto> updateDrug(@PathVariable long id , @Valid @RequestBody DrugRequestDto dto){
         return  ResponseEntity.status(HttpStatus.OK).body(drugService.updateDrug(id,dto));
     }
 

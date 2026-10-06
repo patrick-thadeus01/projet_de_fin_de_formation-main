@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DrugRepository extends JpaRepository<Drug,Long> {
     Drug findDistinctByDrugName(String drugName);
-
+    boolean existsByCategory_CategoryId(long categoryId);
     List<Drug> findByCategory_CategoryType(String categoryCategoryType);
     @Query("select d from Drug d where d.drugName like :key%")
     List<Drug> searchByKeyWorld(@Param("key") String key);

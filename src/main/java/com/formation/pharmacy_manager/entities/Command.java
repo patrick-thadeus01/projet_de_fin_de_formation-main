@@ -23,6 +23,7 @@ public class Command {
     private long commandId;
 
     @NotNull
+    @Column(unique = true)
     private String pseudo;
 
     @NotNull

@@ -1,25 +1,22 @@
 package com.formation.pharmacy_manager.controller;
 
 import com.formation.pharmacy_manager.dto.userDto.UserConnectDto;
-import com.formation.pharmacy_manager.dto.patientDto.PatientRequestDto;
-import com.formation.pharmacy_manager.dto.userDto.RegisterRequestDto;
 import com.formation.pharmacy_manager.dto.userDto.UserConnectResponse;
-import com.formation.pharmacy_manager.enumEntities.Type;
-import com.formation.pharmacy_manager.repository.UserRepository;
-import com.formation.pharmacy_manager.services.servicePatient.PatientService;
-import jakarta.validation.Valid;
 import com.formation.pharmacy_manager.security.JwtUtil;
+import com.formation.pharmacy_manager.security.LoginAttemptService;
+
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,54 +24,59 @@ import java.util.Map;
 @AllArgsConstructor
 public class AuthController {
 
-    private final PatientService patientService; // Création du compte patient
-    private final UserRepository userRepository; // Contrôle des doublons
-    private final AuthenticationManager authenticationManager; // Gère l’authentification
-    private final JwtUtil jwtUtil; // Utilitaire JWT
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+    private final LoginAttemptService loginAttemptService;
 
-
-
-    @PostMapping("/login") // Endpoint POST /login
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserConnectDto request) {
-        // Crée un token UsernamePassword pour vérifier les identifiants
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        String username = request.getUsername();
 
-        // Si authentification réussie
-        if (authentication.isAuthenticated()) {
+        //1. Vérifier si le compte est actuellement bloqué
+        if (loginAttemptService.isBlocked(username)) {
+            Map<String, String> body = new HashMap<>();
+            body.put("message", "Compte temporairement bloqué après trop de tentatives échouées. "
+                    + "Réessayez dans " + loginAttemptService.getRemainingLockMinutes(username) + " minute(s).");
+            return new ResponseEntity<>(body, HttpStatus.TOO_MANY_REQUESTS);  // 429
+        }
+
+        try {
+            // 2. Tenter l'authentification
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, request.getPassword())
+            );
+
+            //3. Connexion réussie : réinitialiser le compteur
+            loginAttemptService.loginSucceeded(username);
+
             List<String> roles = authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
-                    .map(role -> role.replace("ROLE_", "")) // Nettoie le prefix "ROLE_" si nécessaire
+                    .map(role -> role.replace("ROLE_", ""))
                     .toList();
 
-            // Génère un JWT pour l’utilisateur
-            String token = jwtUtil.generateToken(request.getUsername(),roles);
+            String token = jwtUtil.generateToken(authentication.getName(), roles);
 
-            // Retourne le token + username dans une réponse JSON
             return ResponseEntity.ok(new UserConnectResponse(token, authentication.getName()));
-        } else {
-            // Sinon renvoie 401 Unauthorized
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-    }
 
-    // Inscription publique : le compte créé est TOUJOURS un patient (rôle non choisi par le client)
-    @PostMapping("/api/auth/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDto request) {
-        if (userRepository.findDistinctByUserName(request.userName()) != null
-                || userRepository.findDistinctByEmail(request.email()) != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Nom d'utilisateur ou email déjà utilisé"));
+        } catch (BadCredentialsException e) {
+            //4. Échec : enregistrer la tentative
+            loginAttemptService.loginFailed(username);
+
+            int remaining = loginAttemptService.getRemainingAttempts(username);
+            Map<String, String> body = new HashMap<>();
+            if (remaining > 0) {
+                body.put("message", "Identifiants invalides. "
+                        + remaining + " tentative(s) restante(s) avant blocage.");
+            } else {
+                body.put("message", "Identifiants invalides. Compte bloqué pendant "
+                        + loginAttemptService.getRemainingLockMinutes(username) + " minute(s).");
+            }
+            return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+
+        } catch (Exception e) {
+            Map<String, String> body = new HashMap<>();
+            body.put("message", "Erreur d'authentification : " + e.getMessage());
+            return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        PatientRequestDto dto = new PatientRequestDto(
-                request.userName(),
-                request.phoneNumber(),
-                request.email(),
-                request.password(),
-                request.age(),
-                Type.PATIENT.name()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(patientService.createPatient(dto));
     }
 }

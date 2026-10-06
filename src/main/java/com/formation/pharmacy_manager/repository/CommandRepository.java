@@ -26,4 +26,5 @@ public interface CommandRepository extends JpaRepository<Command,Long> {
 
     @Query("select sum(cd.quantity) from Command c join c.commandDrugList cd where c.pseudo = :pseudo")
     long totalQteDrugHavingCommand(@Param("pseudo") String pseudo);
+    
 }

@@ -5,10 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/**
- * Corps de la requête d'inscription publique.
- * Pas de champ "role" : le rôle PATIENT est imposé côté serveur.
- */
+// Ce DTO est utilisé pour la requête d'enregistrement d'un utilisateur, incluant les champs nécessaires pour créer un nouvel utilisateur dans le système.
 public record RegisterRequestDto(
         @NotBlank(message = "Le nom d'utilisateur ne doit pas être vide.")
         @Size(max = 20, message = "Le nom d'utilisateur doit contenir au maximum 20 caractères.")

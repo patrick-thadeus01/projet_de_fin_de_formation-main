@@ -4,6 +4,8 @@ import com.formation.pharmacy_manager.dto.categoryDto.CategoryPriceDto;
 import com.formation.pharmacy_manager.dto.categoryDto.CategoryRequestDto;
 import com.formation.pharmacy_manager.dto.categoryDto.CategoryResponseDto;
 import com.formation.pharmacy_manager.services.serviceCategory.CategoryService;
+
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,7 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @PostMapping("/create")
-    public ResponseEntity<CategoryResponseDto> create(@RequestBody CategoryRequestDto dto){
+    public ResponseEntity<CategoryResponseDto> create(@Valid @RequestBody CategoryRequestDto dto){
         return ResponseEntity.status(200).body(categoryService.createCategory(dto));
     }
 
@@ -38,7 +40,7 @@ public class CategoryController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<CategoryResponseDto> updateCategory(@PathVariable long id, @RequestBody CategoryRequestDto dto){
+    public ResponseEntity<CategoryResponseDto> updateCategory(@PathVariable long id, @Valid @RequestBody CategoryRequestDto dto){
         return ResponseEntity.status(HttpStatus.OK).body(categoryService.updateCategory(id,dto));
     }
 

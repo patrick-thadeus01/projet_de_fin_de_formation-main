@@ -1,19 +1,21 @@
 package com.formation.pharmacy_manager.entities;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
-
-
-@Entity 
+@Entity
 @Data
 public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long billId;
 
-    private double totalAmount;
+    // BigDecimal au lieu de double
+    @Column(precision = 10, scale = 2)
+    private BigDecimal totalAmount;
 
     private LocalDate creationDate;
 

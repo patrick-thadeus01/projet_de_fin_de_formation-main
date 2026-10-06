@@ -23,6 +23,7 @@ public class Drug {
     private long drugId;
 
     @NotBlank
+    @Column(unique = true)
     private String drugName;
 
     @NotBlank
